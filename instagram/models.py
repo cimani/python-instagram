@@ -84,6 +84,26 @@ class Media(ApiModel):
             for version, version_info in six.iteritems(entry['videos']):
                 new_media.videos[version] = Video.object_from_dictionary(version_info)
 
+        if 'carousel_media' in entry:
+            new_media.carousel = []
+            c = 0
+            for car_entry in entry['carousel_media']:
+                c+=1
+                car_media = Media(id="%s__%s" % (entry['id'], c))
+                car_media.type = car_entry['type']
+
+                if 'images' in car_entry:
+                    car_media.images = {}
+                    for version, version_info in six.iteritems(car_entry['images']):
+                        car_media.images[version] = Image.object_from_dictionary(version_info)
+
+                if car_media.type == 'video' and 'videos' in car_entry.keys():
+                    car_media.videos = {}
+                    for version, version_info in six.iteritems(car_entry['videos']):
+                        car_media.videos[version] = Video.object_from_dictionary(version_info)
+                
+                new_media.carousel += [car_media]
+                
         if 'user_has_liked' in entry:
             new_media.user_has_liked = entry['user_has_liked']
         new_media.like_count = entry['likes']['count']
